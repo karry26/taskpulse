@@ -1,0 +1,29 @@
+# Java
+target/
+*.log
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+
+# Mac
+.DS_Store
+
+# Node
+node_modules/
+dist/
+
+# Env
+.env
+
+# Logs
+logs/
+
+# Docker volumes
+postgres_data/
+
+# Build outputs
+frontend/dist/
