@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { updateTask } from "../api";
-import type { Task, UpdateTaskBody } from "../api";
+import { updateTask, type Task, type UpdateTaskBody } from "../api/tasks";
 import type { Priority, Status } from "../types/task";
 import "../styles/Modal.css";
 
@@ -90,7 +89,7 @@ export default function EditModal({ task, onClose, onUpdated }: Props) {
               >
                 <option value="PENDING">Pending</option>
                 <option value="IN_PROGRESS">In Progress</option>
-                <option value="DONE">Done</option>
+                <option value="COMPLETED">Completed</option>
               </select>
             </label>
           </div>

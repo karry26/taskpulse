@@ -6,8 +6,9 @@ import TaskCard from "./components/TaskCard";
 import CreateModal from "./components/CreateModal";
 import EditModal from "./components/EditModal";
 import AuthPage from "./pages/AuthPage";
-import { getToken, clearToken, fetchTasks, AuthError, type Task } from "./api";
-import type { FilterStatus } from "./types/task";
+import { getToken, clearToken, AuthError } from "./api/client";
+import { fetchTasks, patchTaskStatus, type Task } from "./api/tasks";
+import type { FilterStatus, Status } from "./types/task";
 
 export default function App() {
   const [authed, setAuthed] = useState<boolean>(() => !!getToken());
@@ -17,6 +18,7 @@ export default function App() {
   const [showModal, setModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [filter, setFilter] = useState<FilterStatus>("ALL");
+  const [dragOverCol, setDragOverCol] = useState<Status | null>(null);
 
   function handleLogout() {
     clearToken();
@@ -30,6 +32,45 @@ export default function App() {
 
   function handleTaskDeleted(id: string) {
     setTasks((prev) => prev.filter((t) => t.id !== id));
+  }
+
+  async function handleDrop(taskId: string, newStatus: Status) {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task || task.status === newStatus) return;
+    // Optimistic update so the card moves instantly
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId ? ({ ...t, status: newStatus } as Task) : t,
+      ),
+    );
+    try {
+      const updated = await patchTaskStatus(taskId, newStatus);
+      setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    } catch {
+      // Revert on failure
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === taskId ? ({ ...t, status: task.status } as Task) : t,
+        ),
+      );
+      alert("Could not move task.");
+    }
+  }
+
+  function dropProps(col: Status) {
+    return {
+      onDragOver: (e: React.DragEvent) => {
+        e.preventDefault();
+        setDragOverCol(col);
+      },
+      onDragLeave: () => setDragOverCol(null),
+      onDrop: (e: React.DragEvent) => {
+        e.preventDefault();
+        setDragOverCol(null);
+        const id = e.dataTransfer.getData("taskId");
+        if (id) handleDrop(id, col);
+      },
+    };
   }
 
   const load = useCallback(async () => {
@@ -62,10 +103,9 @@ export default function App() {
     );
   }
 
-  const pendingTasks = tasks.filter(
-    (t) => t.status === "PENDING" || t.status === "IN_PROGRESS",
-  );
-  const completedTasks = tasks.filter((t) => t.status === "DONE");
+  const pendingTasks = tasks.filter((t) => t.status === "PENDING");
+  const inProgressTasks = tasks.filter((t) => t.status === "IN_PROGRESS");
+  const completedTasks = tasks.filter((t) => t.status === "COMPLETED");
   const visible =
     filter === "ALL" ? tasks : tasks.filter((t) => t.status === filter);
 
@@ -100,14 +140,17 @@ export default function App() {
         )}
         {!loading && !error && filter === "ALL" && (
           <div className="task-sections">
-            {/* Pending / In-Progress column */}
-            <section className="task-section">
+            {/* ── Pending ── */}
+            <section
+              className={`task-section${dragOverCol === "PENDING" ? " drag-over" : ""}`}
+              {...dropProps("PENDING")}
+            >
               <div className="section-header">
-                <h2 className="section-title">Active Tasks</h2>
+                <h2 className="section-title">Pending</h2>
                 <span className="section-count">{pendingTasks.length}</span>
               </div>
               {pendingTasks.length === 0 ? (
-                <div className="section-empty">No active tasks 🎉</div>
+                <div className="section-empty">Drop tasks here</div>
               ) : (
                 <div className="task-list">
                   {pendingTasks.map((t) => (
@@ -122,14 +165,42 @@ export default function App() {
               )}
             </section>
 
-            {/* Completed column */}
-            <section className="task-section">
+            {/* ── In Progress ── */}
+            <section
+              className={`task-section${dragOverCol === "IN_PROGRESS" ? " drag-over" : ""}`}
+              {...dropProps("IN_PROGRESS")}
+            >
+              <div className="section-header">
+                <h2 className="section-title">In Progress</h2>
+                <span className="section-count">{inProgressTasks.length}</span>
+              </div>
+              {inProgressTasks.length === 0 ? (
+                <div className="section-empty">Drop tasks here</div>
+              ) : (
+                <div className="task-list">
+                  {inProgressTasks.map((t) => (
+                    <TaskCard
+                      key={t.id}
+                      task={t}
+                      onEdit={setEditingTask}
+                      onDelete={handleTaskDeleted}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* ── Completed ── */}
+            <section
+              className={`task-section${dragOverCol === "COMPLETED" ? " drag-over" : ""}`}
+              {...dropProps("COMPLETED")}
+            >
               <div className="section-header">
                 <h2 className="section-title">Completed</h2>
                 <span className="section-count">{completedTasks.length}</span>
               </div>
               {completedTasks.length === 0 ? (
-                <div className="section-empty">No completed tasks yet.</div>
+                <div className="section-empty">Drop tasks here</div>
               ) : (
                 <div className="task-list">
                   {completedTasks.map((t) => (

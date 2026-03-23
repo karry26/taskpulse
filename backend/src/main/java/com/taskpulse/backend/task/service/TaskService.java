@@ -1,6 +1,7 @@
 package com.taskpulse.backend.task.service;
 
 import com.taskpulse.backend.task.entity.Task;
+import com.taskpulse.backend.task.entity.TaskStatus;
 import com.taskpulse.backend.task.repository.TaskRepository;
 import com.taskpulse.backend.user.entity.User;
 import com.taskpulse.backend.user.repository.UserRepository;
@@ -40,7 +41,7 @@ public class TaskService {
         // Step 4 — Attach user to task
         task.setUser(user);
         task.setCreatedAt(LocalDateTime.now());
-        task.setStatus("PENDING");
+        task.setStatus(TaskStatus.PENDING);
 
         return repository.save(task);
     }
@@ -117,5 +118,32 @@ public class TaskService {
                                 new RuntimeException("Task not found"));
 
         repository.delete(task);
+    }
+
+    public Task updateStatus(UUID id, TaskStatus status) {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        String email =
+                (String) authentication.getPrincipal();
+
+        User user =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow(() ->
+                                new RuntimeException("User not found"));
+
+        Task task =
+                repository
+                        .findByIdAndUser(id, user)
+                        .orElseThrow(() ->
+                                new RuntimeException("Task not found"));
+
+        task.setStatus(status);
+
+        return repository.save(task);
     }
 }

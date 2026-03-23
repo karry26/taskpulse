@@ -9,19 +9,26 @@ interface Props {
   onRefresh: () => void;
 }
 
-export default function FilterBar({ filter, counts, onFilter, onRefresh }: Props) {
+export default function FilterBar({
+  filter,
+  counts,
+  onFilter,
+  onRefresh,
+}: Props) {
   return (
     <div className="filter-bar">
-      {(["ALL", "PENDING", "IN_PROGRESS", "DONE"] as FilterStatus[]).map((s) => (
-        <button
-          key={s}
-          className={`filter-btn${filter === s ? " active" : ""}`}
-          onClick={() => onFilter(s)}
-        >
-          {s === "ALL" ? "All" : STATUS_META[s as Status].label}
-          <span className="filter-count">{counts[s] ?? 0}</span>
-        </button>
-      ))}
+      {(["ALL", "PENDING", "IN_PROGRESS", "COMPLETED"] as FilterStatus[]).map(
+        (s) => (
+          <button
+            key={s}
+            className={`filter-btn${filter === s ? " active" : ""}`}
+            onClick={() => onFilter(s)}
+          >
+            {s === "ALL" ? "All" : STATUS_META[s as Status].label}
+            <span className="filter-count">{counts[s] ?? 0}</span>
+          </button>
+        ),
+      )}
       <button
         className="btn btn-ghost refresh-btn"
         onClick={onRefresh}

@@ -1,4 +1,5 @@
 import { authFetch } from "./client";
+import type { Status, Priority } from "../types/task";
 
 // ─── Task model ────────────────────────────────────────────────────────────────
 
@@ -6,8 +7,8 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  priority: "LOW" | "MEDIUM" | "HIGH";
-  status: "PENDING" | "IN_PROGRESS" | "DONE";
+  priority: Priority;
+  status: Status;
   dueDate: string | null;
   createdAt: string;
 }
@@ -15,15 +16,15 @@ export interface Task {
 export interface CreateTaskBody {
   title: string;
   description: string;
-  priority: "LOW" | "MEDIUM" | "HIGH";
+  priority: Priority;
   dueDate: string;
 }
 
 export interface UpdateTaskBody {
   title?: string;
   description?: string;
-  priority?: "LOW" | "MEDIUM" | "HIGH";
-  status?: "PENDING" | "IN_PROGRESS" | "DONE";
+  priority?: Priority;
+  status?: Status;
   dueDate?: string | null;
 }
 
@@ -65,4 +66,17 @@ export async function updateTask(
 export async function deleteTask(id: string): Promise<void> {
   const res = await authFetch(`/tasks/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete task.");
+}
+
+// ─── PATCH /tasks/{id}/status — used by drag-and-drop ─────────────────────────
+export async function patchTaskStatus(
+  id: string,
+  status: Status,
+): Promise<Task> {
+  const res = await authFetch(`/tasks/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error("Failed to update task status.");
+  return res.json();
 }

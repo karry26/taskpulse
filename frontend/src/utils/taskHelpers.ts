@@ -1,5 +1,5 @@
 import type { Priority, Status } from "../types/task";
-import type { CreateTaskBody } from "../api";
+import type { CreateTaskBody } from "../api/tasks";
 
 // ─── Priority display metadata ─────────────────────────────────────────────────
 
@@ -14,7 +14,7 @@ export const PRIORITY_META: Record<Priority, { label: string; cls: string }> = {
 export const STATUS_META: Record<Status, { label: string; cls: string }> = {
   PENDING: { label: "Pending", cls: "status-pending" },
   IN_PROGRESS: { label: "In Progress", cls: "status-in_progress" },
-  DONE: { label: "Done", cls: "status-done" },
+  COMPLETED: { label: "Completed", cls: "status-completed" },
 };
 
 // ─── Empty create form ─────────────────────────────────────────────────────────

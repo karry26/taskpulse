@@ -1,5 +1,6 @@
 package com.taskpulse.backend.task.controller;
 
+import com.taskpulse.backend.task.dto.UpdateStatusRequest;
 import com.taskpulse.backend.task.entity.Task;
 import com.taskpulse.backend.task.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,16 @@ public class TaskController {
             @PathVariable UUID id) {
 
         service.delete(id);
+    }
+
+    @PatchMapping("/{id}/status")
+    public Task updateStatus(
+            @PathVariable UUID id,
+            @RequestBody UpdateStatusRequest request) {
+
+        return service.updateStatus(
+                id,
+                request.getStatus()
+        );
     }
 }

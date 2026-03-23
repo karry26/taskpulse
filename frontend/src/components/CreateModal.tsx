@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { createTask } from "../api";
-import type { Task } from "../api";
+import { createTask, type Task } from "../api/tasks";
 import { EMPTY_FORM } from "../utils/taskHelpers";
 import type { Priority } from "../types/task";
 import "../styles/Modal.css";

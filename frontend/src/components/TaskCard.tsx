@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { deleteTask } from "../api";
-import type { Task } from "../api";
+import { deleteTask, type Task } from "../api/tasks";
+import type { Status } from "../types/task";
 import { PRIORITY_META, STATUS_META, fmtDate } from "../utils/taskHelpers";
 import "../styles/TaskCard.css";
 
@@ -12,7 +12,7 @@ interface Props {
 
 export default function TaskCard({ task, onEdit, onDelete }: Props) {
   const p = PRIORITY_META[task.priority] ?? PRIORITY_META.MEDIUM;
-  const s = STATUS_META[task.status] ?? STATUS_META.PENDING;
+  const s = STATUS_META[task.status as Status] ?? STATUS_META.PENDING;
   const [deleting, setDeleting] = useState(false);
 
   async function handleDelete() {
@@ -28,7 +28,14 @@ export default function TaskCard({ task, onEdit, onDelete }: Props) {
   }
 
   return (
-    <div className="task-card">
+    <div
+      className="task-card"
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("taskId", task.id);
+        e.dataTransfer.effectAllowed = "move";
+      }}
+    >
       <div className="task-card-header">
         <span className={`badge ${p.cls}`}>{p.label}</span>
         <span className={`status-chip ${s.cls}`}>{s.label}</span>
