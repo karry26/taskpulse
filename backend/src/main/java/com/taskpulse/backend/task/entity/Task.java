@@ -1,5 +1,6 @@
 package com.taskpulse.backend.task.entity;
 
+import com.taskpulse.backend.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,4 +31,8 @@ public class Task {
     private LocalDateTime dueDate;
 
     private LocalDateTime createdAt;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

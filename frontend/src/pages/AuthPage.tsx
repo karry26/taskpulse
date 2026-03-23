@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { login, register } from "./api";
+import { login, register } from "../api";
+import "../styles/AuthPage.css";
 
 type Tab = "login" | "register";
 

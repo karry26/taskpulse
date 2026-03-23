@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/tasks")
@@ -22,5 +23,20 @@ public class TaskController {
     @GetMapping
     public List<Task> getAll() {
         return service.getAll();
+    }
+
+    @PutMapping("/{id}")
+    public Task update(
+            @PathVariable UUID id,
+            @RequestBody Task task) {
+
+        return service.update(id, task);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(
+            @PathVariable UUID id) {
+
+        service.delete(id);
     }
 }
