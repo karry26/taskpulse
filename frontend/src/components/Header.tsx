@@ -7,7 +7,12 @@ interface Props {
   unreadCount: number;
 }
 
-export default function Header({ onNewTask, onLogout, onNotifications, unreadCount }: Props) {
+export default function Header({
+  onNewTask,
+  onLogout,
+  onNotifications,
+  unreadCount,
+}: Props) {
   return (
     <header className="app-header">
       <div className="header-brand">
@@ -26,7 +31,9 @@ export default function Header({ onNewTask, onLogout, onNotifications, unreadCou
         >
           🔔
           {unreadCount > 0 && (
-            <span className="notif-badge">{unreadCount > 99 ? "99+" : unreadCount}</span>
+            <span className="notif-badge">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
           )}
         </button>
         <button className="btn btn-ghost" onClick={onLogout}>
