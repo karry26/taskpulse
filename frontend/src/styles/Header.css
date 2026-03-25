@@ -79,6 +79,27 @@
   font-weight: 600;
 }
 
+/* ── Notification bell button ─────────────────────────────────────────────── */
+.notif-bell-btn {
+  position: relative;
+  font-size: 16px;
+  padding: 7px 12px;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background: var(--high);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
 .filter-btn.active .filter-count {
   background: rgba(255, 255, 255, 0.25);
 }

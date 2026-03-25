@@ -1,13 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import "./index.css";
 import Header from "./components/Header";
 import FilterBar from "./components/FilterBar";
 import TaskCard from "./components/TaskCard";
 import CreateModal from "./components/CreateModal";
 import EditModal from "./components/EditModal";
+import NotificationsPanel from "./components/NotificationsPanel";
 import AuthPage from "./pages/AuthPage";
 import { getToken, clearToken, AuthError } from "./api/client";
 import { fetchTasks, patchTaskStatus, type Task } from "./api/tasks";
+import { fetchNotifications, type Notification } from "./api/notifications";
 import type { FilterStatus, Status } from "./types/task";
 
 export default function App() {
@@ -20,10 +22,21 @@ export default function App() {
   const [filter, setFilter] = useState<FilterStatus>("ALL");
   const [dragOverCol, setDragOverCol] = useState<Status | null>(null);
 
+  // ── Notifications state ────────────────────────────────────────────────────
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifPanelOpen, setNotifPanelOpen] = useState(false);
+  // IDs of notifications the user hasn't seen yet
+  const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set());
+  const seenIdsRef = useRef<Set<string>>(new Set());
+
   function handleLogout() {
     clearToken();
     setAuthed(false);
     setTasks([]);
+    setNotifications([]);
+    setUnreadIds(new Set());
+    seenIdsRef.current = new Set();
   }
 
   function handleTaskUpdated(updated: Task) {
@@ -89,9 +102,50 @@ export default function App() {
     }
   }, []);
 
+  const loadNotifications = useCallback(async () => {
+    setNotifLoading(true);
+    try {
+      const data = await fetchNotifications();
+      setNotifications(data);
+      // Mark any notification IDs we haven't seen before as unread
+      setUnreadIds((prev) => {
+        const next = new Set(prev);
+        for (const n of data) {
+          if (!seenIdsRef.current.has(n.id)) {
+            next.add(n.id);
+          }
+        }
+        return next;
+      });
+    } catch {
+      // Silently ignore notification fetch errors (non-critical)
+    } finally {
+      setNotifLoading(false);
+    }
+  }, []);
+
+  function handleOpenNotifications() {
+    setNotifPanelOpen(true);
+    // Mark all current notifications as seen
+    setUnreadIds(new Set());
+    seenIdsRef.current = new Set(notifications.map((n) => n.id));
+  }
+
+  function handleCloseNotifications() {
+    setNotifPanelOpen(false);
+  }
+
   useEffect(() => {
     if (authed) load();
   }, [authed, load]);
+
+  // Poll notifications every 60 s (matches the backend scheduler interval)
+  useEffect(() => {
+    if (!authed) return;
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 60_000);
+    return () => clearInterval(interval);
+  }, [authed, loadNotifications]);
 
   if (!authed) {
     return (
@@ -114,7 +168,12 @@ export default function App() {
 
   return (
     <div className="app">
-      <Header onNewTask={() => setModal(true)} onLogout={handleLogout} />
+      <Header
+        onNewTask={() => setModal(true)}
+        onLogout={handleLogout}
+        onNotifications={handleOpenNotifications}
+        unreadCount={unreadIds.size}
+      />
 
       <FilterBar
         filter={filter}
@@ -252,6 +311,17 @@ export default function App() {
           task={editingTask}
           onClose={() => setEditingTask(null)}
           onUpdated={handleTaskUpdated}
+        />
+      )}
+
+      {/* Notifications panel */}
+      {notifPanelOpen && (
+        <NotificationsPanel
+          notifications={notifications}
+          loading={notifLoading}
+          unreadIds={unreadIds}
+          onClose={handleCloseNotifications}
+          onRefresh={loadNotifications}
         />
       )}
     </div>

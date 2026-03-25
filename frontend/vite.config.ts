@@ -10,6 +10,7 @@ export default defineConfig({
       "/tasks": { target: "http://localhost:8081", changeOrigin: true },
       "/auth": { target: "http://localhost:8081", changeOrigin: true },
       "/users": { target: "http://localhost:8081", changeOrigin: true },
+      "/notifications": { target: "http://localhost:8081", changeOrigin: true },
     },
   },
 });
