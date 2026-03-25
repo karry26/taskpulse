@@ -2,6 +2,7 @@ package com.taskpulse.backend.task.service;
 
 import com.taskpulse.backend.task.entity.Task;
 import com.taskpulse.backend.task.entity.TaskStatus;
+import com.taskpulse.backend.task.redis.RedisService;
 import com.taskpulse.backend.task.repository.TaskRepository;
 import com.taskpulse.backend.user.entity.User;
 import com.taskpulse.backend.user.repository.UserRepository;
@@ -20,6 +21,7 @@ public class TaskService {
 
     private final TaskRepository repository;
     private final UserRepository userRepository;
+    private final RedisService redisService;
     public Task create(Task task) {
         // Step 1 — Get authentication
         Authentication authentication =
@@ -43,7 +45,9 @@ public class TaskService {
         task.setCreatedAt(LocalDateTime.now());
         task.setStatus(TaskStatus.PENDING);
 
-        return repository.save(task);
+        Task savedTask = repository.save(task);
+        redisService.saveReminder(savedTask);
+        return savedTask;
     }
 
     public List<Task> getAll() {
