@@ -1,6 +1,7 @@
 // ─── Token storage ─────────────────────────────────────────────────────────────
 
 const TOKEN_KEY = "tp_token";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -32,7 +33,7 @@ export async function authFetch(
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(input, { ...init, headers });
+  const res = await fetch(`${BASE_URL}${input}`, { ...init, headers });
 
   if (res.status === 401) {
     clearToken();
