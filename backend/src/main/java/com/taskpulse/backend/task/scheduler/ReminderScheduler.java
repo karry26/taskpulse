@@ -43,6 +43,7 @@ public class ReminderScheduler {
 
             String value =
                     redisService.getReminder(key);
+            System.out.println("value " + value + key);
 
             if (value == null) {
                 continue;
@@ -63,7 +64,7 @@ public class ReminderScheduler {
 
                 String taskId =
                         key.replace("reminder:", "");
-
+                System.out.println("taskId " + taskId);
                 String taskTitle = taskRepository
                         .findById(UUID.fromString(taskId))
                         .map(Task::getTitle)
