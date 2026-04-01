@@ -15,7 +15,8 @@ public class RedisService {
     private static final String PREFIX = "reminder:";
     public void saveReminder(Task task) {
         String key = PREFIX + task.getId();
-        Object value = task.getDueDate().toString();
+        // Store userId:dueDate so the scheduler can include userId in the Kafka event
+        Object value = task.getUser().getId() + ":" + task.getDueDate().toString();
         // Calculate TTL (time until due date)
         long secondsUntilDue =
                 java.time.Duration

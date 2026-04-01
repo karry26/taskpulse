@@ -1,5 +1,7 @@
 package com.taskpulse.backend.notification.entity;
 
+import com.taskpulse.backend.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +25,14 @@ public class Notification {
 
     private String message;
 
+    @Column(name = "is_read", nullable = false, columnDefinition = "boolean default false")
+    private Boolean read = false;
+
     private LocalDateTime createdAt;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
 }
