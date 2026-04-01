@@ -35,6 +35,7 @@ public class KafkaConsumerService {
                         .taskId(event.getTaskId().toString())
                         .message(message)
                         .user(user)
+                        .read(false)
                         .createdAt(LocalDateTime.now())
                         .build();
 
