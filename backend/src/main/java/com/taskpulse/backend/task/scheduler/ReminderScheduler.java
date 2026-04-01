@@ -25,6 +25,7 @@ public class ReminderScheduler {
             DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a");
     @Scheduled(fixedRate = 60000) // every 1 minute
     public void check() {
+        System.out.println("ReminderScheduler running at: " + LocalDateTime.now());
 
         // Step 1 — current time
         LocalDateTime now =
@@ -36,6 +37,7 @@ public class ReminderScheduler {
 
         Set<String> reminderKeys =
                 redisService.getAllReminderKeys();
+        System.out.println("Found keys: " + reminderKeys.size());
 
         for (String key : reminderKeys) {
 
